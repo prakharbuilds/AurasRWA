@@ -1,0 +1,16 @@
+packages:
+  "recharts": "Data visualization for asset price history, portfolio performance, and allocation"
+  "framer-motion": "Premium page transitions, micro-interactions, and chart entry animations"
+  "date-fns": "Formatting dates for transaction history and price charts"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility for merging tailwind classes safely"
+
+images:
+  - path: "artifacts/rwa-platform/public/images/hero-bg.png"
+    description: "Abstract digital global network with glowing nodes in gold and deep navy blue, premium web3 finance aesthetic, dark background, subtle depth and light leaks"
+    aspect_ratio: "16:9"
+
+notes:
+  - App is wrapped in a Sidebar layout for secondary pages, using dark mode natively.
+  - Orval generated React Query hooks are imported from @workspace/api-client-react.
+  - Wouter is used for routing.

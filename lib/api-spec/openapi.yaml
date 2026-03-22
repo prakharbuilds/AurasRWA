@@ -1,15 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: RWA Tokenization Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: assets
+    description: Real-world asset operations
+  - name: portfolio
+    description: User portfolio operations
+  - name: transactions
+    description: Transaction operations
+  - name: market
+    description: Market data operations
 paths:
   /healthz:
     get:
@@ -24,6 +31,190 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /assets:
+    get:
+      operationId: listAssets
+      tags: [assets]
+      summary: List all tokenized assets
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of assets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetListResponse"
+    post:
+      operationId: createAsset
+      tags: [assets]
+      summary: Submit a new asset for tokenization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssetRequest"
+      responses:
+        "201":
+          description: Asset created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asset"
+
+  /assets/{id}:
+    get:
+      operationId: getAsset
+      tags: [assets]
+      summary: Get a single asset by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Asset detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /portfolio:
+    get:
+      operationId: getPortfolio
+      tags: [portfolio]
+      summary: Get user portfolio overview
+      responses:
+        "200":
+          description: Portfolio data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Portfolio"
+
+  /portfolio/holdings:
+    get:
+      operationId: listHoldings
+      tags: [portfolio]
+      summary: List all token holdings
+      responses:
+        "200":
+          description: Holdings list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Holding"
+
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [transactions]
+      summary: List all transactions
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: assetId
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transactions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+    post:
+      operationId: createTransaction
+      tags: [transactions]
+      summary: Execute a buy or sell transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionRequest"
+      responses:
+        "201":
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /market/stats:
+    get:
+      operationId: getMarketStats
+      tags: [market]
+      summary: Get overall market statistics
+      responses:
+        "200":
+          description: Market stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketStats"
+
+  /market/price-history/{assetId}:
+    get:
+      operationId: getPriceHistory
+      tags: [market]
+      summary: Get token price history for an asset
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: days
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Price history data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PricePoint"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +225,392 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    Asset:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        symbol:
+          type: string
+        category:
+          type: string
+          description: "real_estate | commodities | bonds | art | infrastructure | private_equity"
+        description:
+          type: string
+        totalValue:
+          type: number
+          description: Total asset valuation in USD
+        tokenPrice:
+          type: number
+          description: Price per token in USD
+        totalTokens:
+          type: integer
+          description: Total number of tokens issued
+        availableTokens:
+          type: integer
+          description: Tokens available for purchase
+        annualYield:
+          type: number
+          description: Expected annual yield percentage
+        status:
+          type: string
+          description: "active | pending | completed | paused"
+        location:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        priceChange24h:
+          type: number
+          description: 24h price change percentage
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - symbol
+        - category
+        - description
+        - totalValue
+        - tokenPrice
+        - totalTokens
+        - availableTokens
+        - annualYield
+        - status
+        - location
+        - createdAt
+
+    AssetDetail:
+      allOf:
+        - $ref: "#/components/schemas/Asset"
+        - type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: "#/components/schemas/Document"
+            tokenDistribution:
+              type: array
+              items:
+                $ref: "#/components/schemas/TokenDistributionEntry"
+            highlights:
+              type: array
+              items:
+                type: string
+            riskLevel:
+              type: string
+              description: "low | medium | high"
+            maturityDate:
+              type: string
+              format: date-time
+            minimumInvestment:
+              type: number
+          required:
+            - documents
+            - tokenDistribution
+            - highlights
+            - riskLevel
+            - minimumInvestment
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+        url:
+          type: string
+      required:
+        - id
+        - name
+        - type
+        - url
+
+    TokenDistributionEntry:
+      type: object
+      properties:
+        label:
+          type: string
+        percentage:
+          type: number
+        color:
+          type: string
+      required:
+        - label
+        - percentage
+        - color
+
+    AssetListResponse:
+      type: object
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - assets
+        - total
+        - page
+        - limit
+
+    CreateAssetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        symbol:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        totalValue:
+          type: number
+        tokenPrice:
+          type: number
+        totalTokens:
+          type: integer
+        annualYield:
+          type: number
+        location:
+          type: string
+        riskLevel:
+          type: string
+        minimumInvestment:
+          type: number
+      required:
+        - name
+        - symbol
+        - category
+        - description
+        - totalValue
+        - tokenPrice
+        - totalTokens
+        - annualYield
+        - location
+        - riskLevel
+        - minimumInvestment
+
+    Holding:
+      type: object
+      properties:
+        id:
+          type: integer
+        assetId:
+          type: integer
+        assetName:
+          type: string
+        assetSymbol:
+          type: string
+        assetCategory:
+          type: string
+        tokensOwned:
+          type: integer
+        currentValue:
+          type: number
+        purchaseValue:
+          type: number
+        gainLoss:
+          type: number
+        gainLossPercent:
+          type: number
+        annualYield:
+          type: number
+        pendingYield:
+          type: number
+      required:
+        - id
+        - assetId
+        - assetName
+        - assetSymbol
+        - assetCategory
+        - tokensOwned
+        - currentValue
+        - purchaseValue
+        - gainLoss
+        - gainLossPercent
+        - annualYield
+        - pendingYield
+
+    Portfolio:
+      type: object
+      properties:
+        totalValue:
+          type: number
+        totalInvested:
+          type: number
+        totalGainLoss:
+          type: number
+        totalGainLossPercent:
+          type: number
+        totalPendingYield:
+          type: number
+        allocationByCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/AllocationEntry"
+        performanceHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/PricePoint"
+      required:
+        - totalValue
+        - totalInvested
+        - totalGainLoss
+        - totalGainLossPercent
+        - totalPendingYield
+        - allocationByCategory
+        - performanceHistory
+
+    AllocationEntry:
+      type: object
+      properties:
+        category:
+          type: string
+        value:
+          type: number
+        percentage:
+          type: number
+        color:
+          type: string
+      required:
+        - category
+        - value
+        - percentage
+        - color
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        assetId:
+          type: integer
+        assetName:
+          type: string
+        assetSymbol:
+          type: string
+        type:
+          type: string
+          description: "buy | sell | yield"
+        tokens:
+          type: integer
+        pricePerToken:
+          type: number
+        totalAmount:
+          type: number
+        status:
+          type: string
+          description: "completed | pending | failed"
+        txHash:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - assetId
+        - assetName
+        - assetSymbol
+        - type
+        - tokens
+        - pricePerToken
+        - totalAmount
+        - status
+        - createdAt
+
+    CreateTransactionRequest:
+      type: object
+      properties:
+        assetId:
+          type: integer
+        type:
+          type: string
+          description: "buy | sell"
+        tokens:
+          type: integer
+      required:
+        - assetId
+        - type
+        - tokens
+
+    MarketStats:
+      type: object
+      properties:
+        totalMarketCap:
+          type: number
+        totalVolume24h:
+          type: number
+        totalAssets:
+          type: integer
+        activeInvestors:
+          type: integer
+        topPerformers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+        categoryBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryStats"
+      required:
+        - totalMarketCap
+        - totalVolume24h
+        - totalAssets
+        - activeInvestors
+        - topPerformers
+        - categoryBreakdown
+
+    CategoryStats:
+      type: object
+      properties:
+        category:
+          type: string
+        totalValue:
+          type: number
+        assetCount:
+          type: integer
+        avgYield:
+          type: number
+        color:
+          type: string
+      required:
+        - category
+        - totalValue
+        - assetCount
+        - avgYield
+        - color
+
+    PricePoint:
+      type: object
+      properties:
+        date:
+          type: string
+        value:
+          type: number
+      required:
+        - date
+        - value
