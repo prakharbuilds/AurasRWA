@@ -95,7 +95,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium text-foreground line-clamp-1">Overanalyser</span>
-              <span className="text-xs text-muted-foreground line-clamp-1">0x71C...3a9B</span>
+              <span className="text-xs text-muted-foreground line-clamp-1">theoveranalyser</span>
             </div>
           </div>
         </div>
