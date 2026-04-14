@@ -91,7 +91,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-border/50">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center shrink-0">
-              <span className="text-white font-bold text-sm">JS</span>
+              <span className="text-white font-bold text-sm">O
+</span>
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium text-foreground line-clamp-1">Overanalyser</span>
