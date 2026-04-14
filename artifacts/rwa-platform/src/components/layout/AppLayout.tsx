@@ -29,7 +29,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden selection:bg-primary/30 selection:text-primary">
-      
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {mobileOpen && (
@@ -42,7 +41,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
           />
         )}
       </AnimatePresence>
-
       {/* Sidebar */}
       <motion.aside
         className={cn(
@@ -96,13 +94,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="text-white font-bold text-sm">JS</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground line-clamp-1">John Smith</span>
+              <span className="text-sm font-medium text-foreground line-clamp-1">Overanalyser</span>
               <span className="text-xs text-muted-foreground line-clamp-1">0x71C...3a9B</span>
             </div>
           </div>
         </div>
       </motion.aside>
-
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Header */}
